@@ -1,0 +1,40 @@
+ICMP (Internet Control Message Protocol) is an error-reporting protocol that network devices such as routers use to generate error messages to the source IP address when network problems prevent delivery of IP packets.
+
+ip addr show
+ifconfig
+ping google.com -c 4 (will send 4 packets to test connection)
+tracert www.google.com - will trace all the hoops to reach the destination with latency
+netstat -antp - will show all the TCP open ports on the curent machine
+ps -ef | grep 3675 (based on the open ports to find the process) (netstat -antp | grep 3675)
+ss -tunlp 
+nmap
+dig www.google.com
+nslookup www.google.com
+route -n - Kernel IP routing table (mostly to see gateways)
+arp - maping the ip to MAC address
+mtr - live trace
+nmap
+telnet 192.168.40.12(ip) 22(port)
+
+/etc/profile - global configuration
+.bashrc - for the user
+
+read -sp "will prompt and suppres the input: " user
+
+/etc/ssh/sshd_config - hold the variable "passwordAuthentification" (asking on login the password for ssh client(login from different machine))
+
+ssh-keygen - generating private and public key pair
+
+ssh-copy-id devops@web01 (will copy the lock(public key) to the remote machine)
+
+/etc/hostname - hold the records of ip with address (192.168.40.2 slavik.com - like that)
+
+The Domain Name System (DNS) is the phonebook of the Internet. Humans access information online through domain names, like nytimes.com or espn.com.
+
+dns resolusion - https://www.geeksforgeeks.org/address-resolution-in-dns-domain-name-server/
+
+dns records - https://www.cloudflare.com/learning/dns/dns-records/
+
+api gateway - https://www.f5.com/glossary/api-gateway
+
+
