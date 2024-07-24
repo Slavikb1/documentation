@@ -1,0 +1,97 @@
+#login intu the remote machine
+ssh web01
+sudo -i (to become a super user or use sudo)
+#edit the hostname file to refer to the machine by its name and not as IP address
+sudo nano /etc/hostname
+#input inside the file
+web01 
+hostname web01
+logout
+
+#in a local machine
+#edit the hostname file to refer to the machine by its name and not as IP address
+sudo nano /etc/hosts
+#input inside the file
+192.168.10.14 web01
+#try to ping the remote machine to check
+ping web01 -c 4 (to send only 4 packets)
+
+#add user to the remote machine after connecting to it again
+##########################################################################################################
+# PAY ATTENTION! it is not posible to login to ubuntu machine without ssh key if you have only password! #
+# to disable that connect to the machine and wdit the file - sudo nano /etc/ssh/sshd_config              #
+# find the line - PasswordAuthentification and change the no to yes                                      #
+# systemctl restart ssh                                                                                  #
+#that will able you to connect to the machine with password!                                             #
+##########################################################################################################
+useradd devops
+passwd devops
+#insert the new password
+
+#edit the sudoers file
+visudo
+#search for root and below add the content below
+devops ALL=(ALL)	NOPASSWD: ALL
+
+#now we set the hotnames and a user but we still cannot execute remote commands as it will ask for password, for that we have to establish the ssh key based connection!
+#creating a key pair for machines on local machine
+ssh-keygen (give a name to the key pair, the public key will akt as the lock and can be shipped to the remote host, the private is the key to open the lock and must not be shared!
+#transfer the public key to the remote machine
+ssh-copy-id devops@web01 (that will ask password and afterwords will transfer the public key to the remote machine)
+#check if it is set and working
+ssh devops@web01 uptime (that is actually taking the default key from .ssh/id_rsa so pay attention to that! that is why you have to give a name to the key so it will create it in the directory!)
+ssh -i (location of the key) devops@web01 uptime
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+##########################################################################################################
+# to execute commands on many machine you have to make a file to hold all the hosts as below             #
+##########################################################################################################
+
+nano remhosts
+#give a list of the hosts, the targets
+#like below
+#web01
+#web02
+#web03
+
+#check if you can loop the file
+for host in `cat remhosts`; do echo $host; done (the ';' is a terminator so we can write on the same line)
+#if all ok try to execute some commands on remote hosts as below
+for host in `cat remhosts`; do ssh devops@$host free -m; done
+#now you are able to put it in a script and change the commands as needed!
+
+#Note!
+#if you running commands on remote host, you should check the package manager for the execution to be successfull!
+# check for instance the exit code ($?) for running yum --help (if it is equal to 0 that meen a successfull execution)
+
+#!/bin/bash
+
+yum --help &> /dev/null
+
+if [ $? -eq 0 ]
+then
+	echo "centos based system"
+else
+	echo "not a centos system!!!"
+	#for ubunto system should execute "sudo apt-get update" before runnig commands
+fi
+
+#now when the script is ready, the proper execution is from the remote mashine itself
+scp <source file> <destination>:<path at the remote machine>
+scp testfile.txt devops@web01:/tmp/
+scp -i <private key location> <source file> <destination>:<path at the remote machine>
+
+#remote execution (put in executionable file
+
+#!/bin/bash
+
+USR='devops'
+
+for host in `cat remhosts`
+do
+
+scp myscript.sh $USR@$host:/tmp/
+ssh $USR@$host sudo /tmp/myscript.sh
+ssh $USR@$host sudo rm -rf /tmp/myscript.sh
+
+done
